@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>墣锦环境排查系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #e8f0fe;
+            min-height: 100vh;
+            color: #333;
+            font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .container {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: rgb(152, 209, 253);
+        }
+
+        /* 初始页面样式 */
+        #home-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            background: linear-gradient(135deg, #64B5F6, #42A5F5);
+            border-radius: 20px;
+            margin: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: white;
+            color: #42A5F5;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-weight: 500;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            color: #1976D2;
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* 模块列表样式 */
+        .module-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .module-item {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            padding: 30px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .module-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #64B5F6, #42A5F5);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .module-item:nth-child(1)::before {
+            background: linear-gradient(90deg, #26C6DA, #00BCD4);
+        }
+
+        .module-item:nth-child(2)::before {
+            background: linear-gradient(90deg, #66BB6A, #4CAF50);
+        }
+
+        .module-item:nth-child(3)::before {
+            background: linear-gradient(90deg, #FFA726, #FF9800);
+        }
+
+        .module-item:nth-child(4)::before {
+            background: linear-gradient(90deg, #EF5350, #F44336);
+        }
+
+        .module-item:nth-child(5)::before {
+            background: linear-gradient(90deg, #AB47BC, #9C27B0);
+        }
+
+        .module-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .module-item h2 {
+            color: #333;
+            margin: 0;
+            font-size: 1.6em;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .module-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.03) 50%);
+            border-radius: 0 0 20px 0;
+        }
+
+        /* 表单页面样式 */
+        .form-page {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            align-items: center;
+            gap: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* 搜索框样式优化 */
+        .search-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #company-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        #company-input:focus {
+            outline: none;
+            border-color: #64B5F6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(100,181,246,0.1);
+        }
+
+        .company-list {
+            display: none;
+            margin-top: 10px;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: absolute;
+            width: 100%;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .company-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .company-item:hover {
+            background: #f0f7ff;
+            color: #1976D2;
+        }
+
+        /* 返回按钮样式 */
+        .back-btn {
+            background: white;
+            color: #333;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn::before {
+            content: "←";
+            font-size: 1.2em;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        /* 提交按钮容器 */
+        .submit-btn-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            padding: 0 200px;
+            margin-top: 40px;
+        }
+
+        /* 提交按钮样式 */
+        .submit-btn {
+            background: linear-gradient(135deg, #64B5F6, #42A5F5);
+            color: white;
+            padding: 15px 50px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(100,181,246,0.3);
+        }
+
+        /* 成功消息样式 */
+        .success-msg {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(76,175,80,0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 进度指示器样式 */
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-step.active {
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: "→";
+            margin: 0 10px;
+            color: #ccc;
+        }
+
+        /* 调整开关大小 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;  /* 减小宽度 */
+            height: 22px; /* 减小高度 */
+        }
+
+        .slider:before {
+            height: 16px; /* 减小滑块高度 */
+            width: 16px;  /* 减小滑块宽度 */
+            left: 3px;
+            bottom: 3px;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(18px); /* 调整滑块移动距离 */
+        }
+
+        /* 表单页面内容区域样式 */
+        .form-content {
+            display: none;
+        }
+
+        .form-content.active {
+            display: block;
+        }
+
+        /* 确保标签文字和开关在同一行且对齐 */
+        .inspection-section .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .inspection-section .form-group label:first-child {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .inspection-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .inspection-section h3 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2196F3;
+            color: #333;
+        }
+
+        /* 物资列表样式 */
+        .material-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .material-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .material-item:hover {
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .material-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            align-items: center;
+        }
+
+        .material-info span {
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .material-info span:first-child {
+            font-weight: bold;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <!-- 初始页面 -->
+    <div id="home-page" class="container">
+        <h1>墣锦环境企业环境风险及应急预案排查系统</h1>
+        <button class="btn" onclick="showPage('search-page')">点击进入</button>
+    </div>
+
+    <!-- 搜索页面 -->
+    <div id="search-page" class="container">
+        <div class="search-box">
+            <input type="text" id="company-input" placeholder="请选择企业，支持搜索" 
+                   onclick="showCompanyList()">
+            <div class="company-list" id="company-list">
+                <div class="company-item" onclick="selectCompany('成都天台制药有限公司')">成都天台制药有限公司</div>
+                <div class="company-item" onclick="selectCompany('四川省佳利酒业有限公司')">四川省佳利酒业有限公司</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块列表页面 -->
+    <div id="module-page" class="container">
+        <div class="module-list">
+            <div class="module-item" onclick="showModule(1)">
+                <h2>企业基本信息</h2>
+            </div>
+            <div class="module-item" onclick="showModule(2)">
+                <h2>厂界周边环境风险受体</h2>
+            </div>
+            <div class="module-item" onclick="showModule(3)">
+                <h2>企业应急处置和救援资源调查表（物资）</h2>
+            </div>
+            <div class="module-item" onclick="showModule(4)">
+                <h2>环境风险单元及环境风险物质</h2>
+            </div>
+            <div class="module-item" onclick="showModule(5)">
+                <h2>现场排查</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- 企业基本信息表单页面 -->
+    <div id="info-form-page" class="container">
+        <button class="back-btn" onclick="showPage('module-page')">返回</button>
+        <div class="form-page">
+            <h2>企业基本信息</h2>
+            <form id="company-info-form" onsubmit="return handleSubmit(event)">
+                <div class="form-group">
+                    <label>单位名称：</label>
+                    <input type="text" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>单位编号：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>联系人：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>联系方式：</label>
+                    <input type="tel" required>
+                </div>
+
+                <div class="form-group">
+                    <label>所在工业园：</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>单位地址：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>经纬度：</label>
+                    <input type="text" placeholder="格式：经度, 纬度">
+                </div>
+
+                <div class="form-group">
+                    <label>最新改扩建时间：</label>
+                    <input type="date">
+                </div>
+
+                <div class="form-group">
+                    <label>生产时间：</label>
+                    <input type="text" placeholder="例如：8:00-18:00">
+                </div>
+
+                <div class="form-group">
+                    <label>厂区面积(m²)：</label>
+                    <input type="number">
+                </div>
+
+                <div class="form-group">
+                    <label>所属行业：</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>当前状态：</label>
+                    <select>
+                        <option value="运营">运营</option>
+                        <option value="停产">停产</option>
+                        <option value="倒闭">倒闭</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>企业原辅料：</label>
+                    <textarea rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>生产规模及主要工艺：</label>
+                    <textarea rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>自有/协议队伍：</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="team" value="自有"> 自有</label>
+                        <label><input type="radio" name="team" value="协议"> 协议</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>队伍人数（人）：</label>
+                    <input type="number">
+                </div>
+
+                <div class="form-group">
+                    <label>专业小组数量（人）：</label>
+                    <input type="number">
+                </div>
+
+                <div class="form-group">
+                    <label>企业风险等级：</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>应急预案时间：</label>
+                    <input type="date">
+                </div>
+
+                <div class="form-group">
+                    <label>备案编号：</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>检查人员：</label>
+                    <input type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>检查日期：</label>
+                    <input type="date">
+                </div>
+
+                <div class="form-group">
+                    <label>应急演练及培训：</label>
+                    <select>
+                        <option value="已演练且培训">已演练且培训</option>
+                        <option value="仅培训">仅培训</option>
+                        <option value="仅演练">仅演练</option>
+                        <option value="均无">均无</option>
+                    </select>
+                </div>
+
+                <div class="submit-btn-container">
+                    <button type="submit" class="submit-btn">确认修改</button>
+                </div>
+                <div class="success-msg">✓ 修改成功</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 厂区周边环境风险受体页面 -->
+    <div id="receptor-page" class="container">
+        <button class="back-btn" onclick="showPage('module-page')">返回</button>
+        <div class="form-page">
+            <h2>厂区周边环境风险受体</h2>
+            
+            <!-- 受体列表 -->
+            <div class="receptor-list">
+                <div class="receptor-item" onclick="selectReceptor('南河')">
+                    <h3>南河</h3>
+                </div>
+                <!-- 可以添加更多受体 -->
+            </div>
+
+            <!-- 受体信息表单 -->
+            <form id="receptor-form" onsubmit="return handleReceptorSubmit(event)">
+                <div class="form-group">
+                    <label>序号：</label>
+                    <input type="number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>类型：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>名称：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>现场情况：</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="status" value="有" required> 有</label>
+                        <label><input type="radio" name="status" value="无" required> 无</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>经纬度：</label>
+                    <input type="text" placeholder="格式：经度, 纬度" required>
+                </div>
+
+                <div class="form-group">
+                    <label>受体图片：</label>
+                    <input type="file" accept="image/*" onchange="previewImage(this)" required>
+                    <img id="image-preview" class="image-preview">
+                </div>
+
+                <div class="submit-btn-container">
+                    <button type="submit" class="submit-btn">确认修改</button>
+                </div>
+                <div class="success-msg">✓ 修改成功</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 物资列表页面 -->
+    <div id="material-list-page" class="container">
+        <button class="back-btn" onclick="showPage('module-page')">返回</button>
+        <div class="form-page">
+            <h2>企业应急处置和救援资源调查表（物资）</h2>
+            <div class="material-list">
+                <div class="material-item" onclick="selectMaterial('可燃气体检测器', 'FGBL-004-WZ01', '环境监测采样设备类', '未全部录入')">
+                    <div class="material-info">
+                        <span>物资名称：可燃气体检测器</span>
+                        <span>编号：FGBL-004-WZ01</span>
+                        <span>类型：环境监测采样设备类</span>
+                        <span>状态：未全部录入</span>
+                    </div>
+                </div>
+                <!-- 可以添加更多物资项目 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 物资信息录入页面 -->
+    <div id="material-form-page" class="container">
+        <button class="back-btn" onclick="showPage('material-list-page')">返回</button>
+        <div class="form-page">
+            <h2>物资信息录入</h2>
+            <form id="material-form" onsubmit="return handleMaterialSubmit(event)">
+                <div class="form-group">
+                    <label>物资名称：</label>
+                    <input type="text" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>编号：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>类型：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>现存数量：</label>
+                    <input type="number" required>
+                </div>
+
+                <div class="form-group">
+                    <label>所在位置：</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label>有效期：</label>
+                    <input type="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>现场情况：</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="status" value="有" required> 有</label>
+                        <label><input type="radio" name="status" value="无" required> 无</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>是否在预案中：</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="inPlan" value="是" required> 是</label>
+                        <label><input type="radio" name="inPlan" value="否" required> 否</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>经度：</label>
+                    <input type="number" step="any" required>
+                </div>
+
+                <div class="form-group">
+                    <label>纬度：</label>
+                    <input type="number" step="any" required>
+                </div>
+
+                <div class="form-group">
+                    <label>物资图片：</label>
+                    <input type="file" accept="image/*" onchange="previewMaterialImage(this)" required>
+                    <img id="material-image-preview" class="image-preview">
+                </div>
+
+                <div class="submit-btn-container">
+                    <button type="submit" class="submit-btn">确认修改</button>
+                </div>
+                <div class="success-msg">✓ 修改成功</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 环境风险单元列表页面 -->
+    <div id="risk-unit-page" class="container">
+        <button class="back-btn" onclick="showPage('module-page')">返回</button>
+        <div class="form-page">
+            <h2>环境风险单元及环境风险物质</h2>
+            <div class="risk-unit-list">
+                <div class="risk-unit-item">
+                    <div class="risk-unit-info">
+                        <span>储罐区</span>
+                        <span>正常</span>
+                        <span>RU001</span>
+                    </div>
+                    <div class="status-badge" onclick="showRiskMaterialForm()">未全部录入</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 风险物质录入页面 -->
+    <div id="risk-material-page" class="container">
+        <button class="back-btn" onclick="showPage('risk-unit-page')">返回</button>
+        <div class="form-page">
+            <h2>风险物质信息录入</h2>
+            <form id="risk-material-form" onsubmit="return handleRiskMaterialSubmit(event)">
+                <div class="form-group">
+                    <label>涉水：</label>
+                    <label class="switch">
+                        <input type="checkbox" onchange="updateSwitchValue(this, 'water')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>涉气：</label>
+                    <label class="switch">
+                        <input type="checkbox" onchange="updateSwitchValue(this, 'gas')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>现场情况：</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="status" value="有" required> 有</label>
+                        <label><input type="radio" name="status" value="无" required> 无</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>风险物质类型：</label>
+                    <select required>
+                        <option value="">请选择</option>
+                        <option value="有毒气态物质">有毒气态物质</option>
+                        <option value="易燃易爆气态物质">易燃易爆气态物质</option>
+                        <option value="有毒液态物质">有毒液态物质</option>
+                        <option value="易燃液态物质">易燃液态物质</option>
+                        <option value="其他有毒物质">其他有毒物质</option>
+                        <option value="遇水生成有毒气体物质">遇水生成有毒气体物质</option>
+                        <option value="重金属及其化合物质">重金属及其化合物质</option>
+                        <option value="其他类物质及污染物">其他类物质及污染物</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>是否在预案中：</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="inPlan" value="是" required> 是</label>
+                        <label><input type="radio" name="inPlan" value="否" required> 否</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>最大存储：</label>
+                    <input type="number" required>
+                </div>
+
+                <div class="form-group">
+                    <label>风险物质图片：</label>
+                    <input type="file" accept="image/*" onchange="previewRiskMaterialImage(this)" required>
+                    <img id="risk-material-image-preview" class="image-preview">
+                </div>
+
+                <div class="submit-btn-container">
+                    <button type="submit" class="submit-btn">确认修改</button>
+                </div>
+                <div class="success-msg">✓ 修改成功</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 风险单元信息录入页面 -->
+    <div id="risk-unit-form-page" class="container">
+        <button class="back-btn" onclick="showPage('risk-unit-page')">返回</button>
+        <div class="form-page">
+            <h2>风险单元信息录入</h2>
+            <form id="risk-unit-form" onsubmit="return handleRiskUnitSubmit(event)">
+                <div class="form-group">
+                    <label>经度：</label>
+                    <input type="number" step="any" required>
+                </div>
+
+                <div class="form-group">
+                    <label>纬度：</label>
+                    <input type="number" step="any" required>
+                </div>
+
+                <div class="form-group">
+                    <label>风险单元图片：</label>
+                    <input type="file" accept="image/*" onchange="previewRiskUnitImage(this)" required>
+                    <img id="risk-unit-image-preview" class="image-preview">
+                </div>
+
+                <div class="submit-btn-container">
+                    <button type="submit" class="submit-btn">确认修改</button>
+                </div>
+                <div class="success-msg">✓ 修改成功</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 现场排查页面 -->
+    <div id="inspection-page" class="container">
+        <button class="back-btn" onclick="showPage('module-page')">返回</button>
+        <div class="form-page">
+            <h2>现场排查</h2>
+            
+            <!-- 进度指示器 -->
+            <div class="progress-indicator">
+                <div class="progress-step active">应急预案排查</div>
+                <div class="progress-step">应急池防控措施</div>
+                <div class="progress-step">厂内排水系统防控措施</div>
+                <div class="progress-step">雨水、清净下水和污(废)水的总排口防控措施</div>
+                <div class="progress-step">大气环境风险防控措施</div>
+                <div class="progress-step">土壤、地下水风险防控措施</div>
+            </div>
+
+            <!-- 第一部分：应急预案排查 -->
+            <div class="form-content active" id="emergency-plan">
+                <div class="inspection-section">
+                    <h3>1. 应急预案排查</h3>
+                    <form id="emergency-plan-form">
+                        <div class="form-group">
+                            <label>是否查到有效环评及批复：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasValidEIA')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>应急预案是否符合环评内容：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'matchesEIA')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>企业环境风险物质、风险单元的识别是否准确：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'accurateRiskIdentification')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>厂界周边500m范围内环境风险受体识别是否准确：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'accurateReceptorIdentification')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>现有突发环境事件风险物质种类、数量和风险评估报告相比是否发生变化：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'riskSubstanceChanged')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>风险物质种类、数量变化是否影响风险等级：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'riskLevelAffected')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>突发环境事件风险等级确定是否正确合理：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'correctRiskLevel')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>现有环境应急能力的差距分析与整改计划是否清晰：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'clearGapAnalysis')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>应急预案中是否设置了应急组织机构、人员信息是否健全、是否明确职责：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasOrganization')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否有预防与预警机制，是否责任清晰，明确到人：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasPreventionMechanism')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否有明确的信息报告及应急响应流程：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasReportProcess')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否有应急响应措施：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasResponseMeasures')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>要件是否齐备完善：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'completeDocuments')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否按要求对预案进行评审，且有评审意见修改说明：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasReview')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>应急预案现有变动是否属于重大变更：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'majorChanges')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否每三年进行回顾性评估：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'triannualReview')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否与其他组织或单位签订应急救援协议或互救协议：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasAgreements')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否对现有物资进行定期检查，对已消耗或耗损的物资装备进行及时补充：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'regularCheck')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>备注：</label>
+                            <textarea rows="4" placeholder="请输入备注信息"></textarea>
+                        </div>
+
+                        <div class="submit-btn-container">
+                            <button type="button" class="submit-btn" onclick="goToNextSection()">下一步</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 第二部分：应急池防控措施 -->
+            <div class="form-content" id="emergency-pool">
+                <div class="inspection-section">
+                    <h3>2. 应急池防控措施</h3>
+                    <form id="emergency-pool-form">
+                        <div class="form-group">
+                            <label>环评、应急预案是否要求有应急池：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'requiresPool')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>应急池容积是否满足环评、应急预案等相关文件要求：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'poolVolume')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>应急池是否排空，并设有在事故时可以紧急排空的技术措施：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'poolEmpty')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>消防水和泄漏物是否能自流进入应急池；如消防水和泄漏物不能自流进入应急池，是否配备有足够能力的排水管和泵，确保泄漏物和消防水能够全部收集：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'waterCollection')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>接纳消防水的排水系统是否设有防止消防水和泄漏物排出厂外的措施：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'preventLeakage')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否通过厂区内部管线或协议单位，将所收集的废(污)水送至污水处理设施处理：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'wasteWaterTreatment')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>备注：</label>
+                            <textarea rows="4" placeholder="请输入备注信息"></textarea>
+                        </div>
+
+                        <div class="submit-btn-container">
+                            <button type="button" class="submit-btn" style="margin-right: 20px;" onclick="goToPreviousSection()">上一步</button>
+                            <button type="button" class="submit-btn" onclick="goToNextSection()">下一步</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 第三部分：厂内排水系统防控措施 -->
+            <div class="form-content" id="drainage-system">
+                <div class="inspection-section">
+                    <h3>3. 厂内排水系统防控措施</h3>
+                    <form id="drainage-system-form">
+                        <div class="form-group">
+                            <label>装置区围堰、罐区防火堤外是否设置排水切换阀：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasSwitchValve')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>所有生产装置、罐区、油品及化学原料装卸台、作业场所和危险废物败存设施(场所)的墙壁、地面冲洗水和受污染的雨水(初期雨水)、消防水，是否都能排入生产废水系统或独立的处理系统：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'wasteWaterSystem')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>受污染的冷却水是否都能排入生产废水系统或独立的处理系统：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'coolingWaterSystem')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否有防止受污染的冷却水、雨水进入雨水系统的措施：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'preventContamination')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>各种装卸区产生的事故液、作业面污水是否设置污水和事故液收集系统以及防治进入雨水系统或水域的措施：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'accidentCollection')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否有排洪沟(排洪涵洞)或河道穿过厂区，且排洪沟(排洪涵洞)与渗漏观察井、生产废水、清净下水排放管道连通：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'drainageConnection')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>备注：</label>
+                            <textarea rows="4" placeholder="请输入厂内排水系统防控措施现场排查其他情况"></textarea>
+                        </div>
+
+                        <div class="submit-btn-container">
+                            <button type="button" class="submit-btn" style="margin-right: 20px;" onclick="goToPreviousSection()">上一步</button>
+                            <button type="button" class="submit-btn" onclick="goToNextSection()">下一步</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 第四部分：雨水、清净下水和污(废)水的总排口防控措施 -->
+            <div class="form-content" id="drainage-control">
+                <div class="inspection-section">
+                    <h3>4. 雨水、清净下水和污(废)水的总排口防控措施</h3>
+                    <form id="drainage-control-form">
+                        <div class="form-group">
+                            <label>雨水、清净下水、排洪沟的厂区总排口是否设置关闭闸(阀)：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasRainDrainageValve')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>设专人负责关闭总排口，确保受污染的雨水、消防水和泄漏物等不排出厂界：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasRainDrainageManager')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>污(废)水的排水总出口是否设置关闭闸(阀)：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasWasteWaterValve')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>设专人负责关闭总排口，确保不合格废水、受污染消防水和泄漏物等不会排出厂界：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasWasteWaterManager')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>备注：</label>
+                            <textarea rows="4" placeholder="请输入雨水、清净下水和污(废)水的总排口防控措施现场排查其他情况"></textarea>
+                        </div>
+
+                        <div class="submit-btn-container">
+                            <button type="button" class="submit-btn" style="margin-right: 20px;" onclick="goToPreviousSection()">上一步</button>
+                            <button type="button" class="submit-btn" onclick="goToNextSection()">下一步</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 第五部分：大气环境风险防控措施 -->
+            <div class="form-content" id="air-control">
+                <div class="inspection-section">
+                    <h3>5. 大气环境风险防控措施</h3>
+                    <form id="air-control-form">
+                        <div class="form-group">
+                            <label>环评、应急预案是否要求设置防护距离：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasProtectionDistance')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否涉及有毒有害大气污染物：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasHarmfulAirPollutants')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>是否建设针对有毒有害大气污染物的环境风险监控、预警措施/体系：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasMonitoringSystem')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>备注：</label>
+                            <textarea rows="4" placeholder="请输入大气环境风险防控措施现场排查其他情况"></textarea>
+                        </div>
+
+                        <div class="submit-btn-container">
+                            <button type="button" class="submit-btn" style="margin-right: 20px;" onclick="goToPreviousSection()">上一步</button>
+                            <button type="button" class="submit-btn" onclick="goToNextSection()">下一步</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 第六部分：土壤、地下水风险防控措施 -->
+            <div class="form-content" id="soil-groundwater-control">
+                <div class="inspection-section">
+                    <h3>6. 土壤、地下水风险防控措施</h3>
+                    <form id="soil-groundwater-control-form">
+                        <div class="form-group">
+                            <label>重点区域是否进行重点防渗措施：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasSeepageControl')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>重点区域重点防渗措施是否有破损：</label>
+                            <label class="switch">
+                                <input type="checkbox" onchange="updateSwitchValue(this, 'hasSeepageDamage')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>备注：</label>
+                            <textarea rows="4" placeholder="请输入土壤、地下水风险防控措施现场排查其他情况"></textarea>
+                        </div>
+
+                        <div class="submit-btn-container">
+                            <button type="button" class="submit-btn" style="margin-right: 20px;" onclick="goToPreviousSection()">上一步</button>
+                            <button type="button" class="submit-btn" onclick="goToNextSection()">下一步</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化显示首页
+        document.getElementById('home-page').style.display = 'flex';
+
+        // 页面切换函数
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.container').forEach(div => {
+                div.style.display = 'none';
+            });
+            
+            // 显示目标页面
+            const targetPage = document.getElementById(pageId);
+            if (pageId === 'home-page') {
+                targetPage.style.display = 'flex';
+            } else if (pageId === 'module-page') {
+                targetPage.style.display = 'block';
+                // 确保模块列表正确显示
+                document.querySelector('.module-list').style.display = 'grid';
+            } else {
+                targetPage.style.display = 'block';
+            }
+        }
+
+        // 显示公司列表
+        function showCompanyList() {
+            const list = document.getElementById('company-list');
+            list.style.display = 'block';
+            
+            // 点击外部区域时隐藏列表
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-box')) {
+                    list.style.display = 'none';
+                }
+            });
+        }
+
+        // 选择公司
+        function selectCompany(companyName) {
+            document.getElementById('company-input').value = companyName;
+            document.getElementById('company-list').style.display = 'none';
+            setTimeout(() => showPage('module-page'), 100); // 添加小延迟确保切换流畅
+        }
+
+        // 模块跳转处理
+        function showModule(moduleNumber) {
+            if(moduleNumber === 1) {
+                showPage('info-form-page');
+            } else if(moduleNumber === 2) {
+                showPage('receptor-page');
+            } else if(moduleNumber === 3) {
+                showPage('material-list-page');
+            } else if(moduleNumber === 4) {
+                showPage('risk-unit-page');
+            } else if(moduleNumber === 5) {
+                showPage('inspection-page');
+            } else {
+                alert('模块开发中');
+            }
+        }
+
+        // 输入搜索功能
+        document.getElementById('company-input').addEventListener('input', function(e) {
+            const filter = e.target.value.toUpperCase();
+            const items = document.getElementsByClassName('company-item');
+            
+            for (let item of items) {
+                const txtValue = item.textContent || item.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+
+        // 表单提交处理
+        function handleSubmit(e) {
+            e.preventDefault();
+            document.querySelector('.success-msg').style.display = 'block';
+            setTimeout(() => {
+                document.querySelector('.success-msg').style.display = 'none';
+            }, 2000);
+            return false;
+        }
+
+        // 选择受体
+        function selectReceptor(name) {
+            document.querySelector('#receptor-form input[type="text"]:nth-of-type(2)').value = name;
+        }
+
+        // 图片预览功能
+        function previewImage(input) {
+            const preview = document.getElementById('image-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 厂区周边环境风险受体表单提交处理
+        function handleReceptorSubmit(e) {
+            e.preventDefault();
+            const successMsg = document.querySelector('#receptor-page .success-msg');
+            successMsg.style.display = 'block';
+            
+            // 清空表单
+            setTimeout(() => {
+                e.target.reset();
+                document.getElementById('image-preview').style.display = 'none';
+                successMsg.style.display = 'none';
+            }, 2000);
+            return false;
+        }
+
+        // 选择物资
+        function selectMaterial(name, code, type, status) {
+            showPage('material-form-page');
+            const form = document.getElementById('material-form');
+            form.querySelector('input[type="text"]:nth-of-type(1)').value = name;
+            form.querySelector('input[type="text"]:nth-of-type(2)').value = code;
+            form.querySelector('input[type="text"]:nth-of-type(3)').value = type;
+        }
+
+        // 物资图片预览功能
+        function previewMaterialImage(input) {
+            const preview = document.getElementById('material-image-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 物资表单提交处理
+        function handleMaterialSubmit(e) {
+            e.preventDefault();
+            const successMsg = document.querySelector('#material-form-page .success-msg');
+            successMsg.style.display = 'block';
+            
+            // 清空表单
+            setTimeout(() => {
+                e.target.reset();
+                document.getElementById('material-image-preview').style.display = 'none';
+                successMsg.style.display = 'none';
+            }, 2000);
+            return false;
+        }
+
+        // 显示风险物质表单
+        function showRiskMaterialForm() {
+            showPage('risk-material-page');
+        }
+
+        // 更新开关值
+        function updateSwitchValue(input, type) {
+            const value = input.checked ? '有' : '无';
+            console.log(`${type}: ${value}`);
+        }
+
+        // 风险物质图片预览
+        function previewRiskMaterialImage(input) {
+            const preview = document.getElementById('risk-material-image-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 风险单元图片预览
+        function previewRiskUnitImage(input) {
+            const preview = document.getElementById('risk-unit-image-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 风险物质表单提交处理
+        function handleRiskMaterialSubmit(e) {
+            e.preventDefault();
+            const successMsg = document.querySelector('#risk-material-page .success-msg');
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                e.target.reset();
+                document.getElementById('risk-material-image-preview').style.display = 'none';
+                successMsg.style.display = 'none';
+                showPage('risk-unit-form-page');
+            }, 2000);
+            return false;
+        }
+
+        // 风险单元表单提交处理
+        function handleRiskUnitSubmit(e) {
+            e.preventDefault();
+            const successMsg = document.querySelector('#risk-unit-form-page .success-msg');
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                e.target.reset();
+                document.getElementById('risk-unit-image-preview').style.display = 'none';
+                successMsg.style.display = 'none';
+                showPage('risk-unit-page');
+            }, 2000);
+            return false;
+        }
+
+        // 跳转到下一个部分
+        function goToNextSection() {
+            const currentSection = document.querySelector('.form-content.active');
+            const currentId = currentSection.id;
+            
+            if (currentId === 'emergency-plan') {
+                showSection('emergency-pool');
+                updateProgressIndicator(2);
+            } else if (currentId === 'emergency-pool') {
+                showSection('drainage-system');
+                updateProgressIndicator(3);
+            } else if (currentId === 'drainage-system') {
+                showSection('drainage-control');
+                updateProgressIndicator(4);
+            } else if (currentId === 'drainage-control') {
+                showSection('air-control');
+                updateProgressIndicator(5);
+            } else if (currentId === 'air-control') {
+                showSection('soil-groundwater-control');
+                updateProgressIndicator(6);
+            } else if (currentId === 'soil-groundwater-control') {
+                alert('所有部分已完成');
+            }
+        }
+
+        // 返回上一个部分
+        function goToPreviousSection() {
+            const currentSection = document.querySelector('.form-content.active');
+            const currentId = currentSection.id;
+            
+            if (currentId === 'emergency-pool') {
+                showSection('emergency-plan');
+                updateProgressIndicator(1);
+            } else if (currentId === 'drainage-system') {
+                showSection('emergency-pool');
+                updateProgressIndicator(2);
+            } else if (currentId === 'drainage-control') {
+                showSection('drainage-system');
+                updateProgressIndicator(3);
+            } else if (currentId === 'air-control') {
+                showSection('drainage-control');
+                updateProgressIndicator(4);
+            } else if (currentId === 'soil-groundwater-control') {
+                showSection('air-control');
+                updateProgressIndicator(5);
+            }
+        }
+
+        // 显示指定部分的内容
+        function showSection(sectionId) {
+            document.querySelectorAll('.form-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // 更新进度指示器
+        function updateProgressIndicator(step) {
+            document.querySelectorAll('.progress-step').forEach((el, index) => {
+                if (index + 1 <= step) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        }
+
+        // 初始化显示第一部分
+        updateProgressIndicator(1);
+    </script>
+</body>
+</html>
