@@ -1,0 +1,124 @@
+.news-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/hero/news-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.news-container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.news-item {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .news-item {
+        flex-direction: row;
+    }
+}
+
+.news-image {
+    flex: 1;
+    min-height: 300px;
+    overflow: hidden;
+}
+
+.news-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.news-image img:hover {
+    transform: scale(1.05);
+}
+
+.news-content {
+    flex: 2;
+    padding: 30px;
+}
+
+.news-title {
+    text-decoration: none;
+}
+
+.news-title h2 {
+    color: #333;
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.news-title:hover h2 {
+    color: #0056b3;
+}
+
+.news-date {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+}
+
+.news-description {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.read-more {
+    display: inline-block;
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.read-more:hover {
+    color: #003d82;
+}
+
+@media (max-width: 767px) {
+    .news-image {
+        min-height: 200px;
+    }
+
+    .news-content {
+        padding: 20px;
+    }
+
+    .news-content h2 {
+        font-size: 1.5em;
+    }
+} 
